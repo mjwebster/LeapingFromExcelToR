@@ -17,8 +17,6 @@ library(rmarkdown)
 library(knitr)
 ```
 
-URL to this page<br>
-https://tinyurl.com/leap-excel-R
 
 
 #Where R beats Excel
