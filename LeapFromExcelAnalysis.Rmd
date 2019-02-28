@@ -52,12 +52,13 @@ It will show up as HTMl on the page we create (this will be body type)
 ```{r}
 #Try displaying the top of the data frame
 deaths
+
 ```
 
 #Select and filter
 ```{r}
  deaths %>% 
-   filter(gender=='F' , race=='BLACK') %>% 
+   filter(gender=='F' , race=='African American') %>% 
    select(firstname, lastname, gender, race)
 ```
 
@@ -273,10 +274,10 @@ write.csv(deaths_export, 'deaths_export.csv', row.names=FALSE)
 
 
 
-#Empty environment and run again
+Empty environment and run again
 
-#Knit the page
+Knit the page
 
-#change echo to false and knit again
+change echo to false and knit again
 
-#show page built with kable()
+show page built with kable()
