@@ -55,7 +55,7 @@ library(knitr)
 -R is made up of Base R, the underlying coding language, but the real power comes from the thousands of packages (or libraries) that enable you to do so many more things. All packages are available on the <a href="https://cran.r-project.org/"> Comprehensive R Archive Network (CRAN)</a>.<br>
 
 #Classes, tutorials, resources
--NICAR conference<br>
+-NICAR conference sessions! <br>
 -<a href="http://learn.r-journalism.com/en/introduction/">Andrew Tran's online class</a><br>
 -<a href="https://www.datacamp.com/courses/dplyr-data-manipulation-r-tutorial">Datacamp</a><br>
 -<a href="https://www.jessesadler.com/post/excel-vs-r/">Excel vs R: A Brief Introduction to R</a><br>
