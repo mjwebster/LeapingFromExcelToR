@@ -1,0 +1,73 @@
+---
+title: "Pros and Cons of R"
+author: "By MaryJo Webster"
+date:  "Last updated: `r Sys.Date()`"
+output:
+  html_document: 
+    toc: true
+    to_depth: 1
+    toc_float: true
+    theme: cerulean
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(rmarkdown)
+library(knitr)
+```
+
+URL to this page<br>
+https://tinyurl.com/leap-excel-R
+
+
+#Where R beats Excel
+
+-Provide a trail of your work<br>
+-Easier for someone else to review<br>
+-Ease of repeatability<br>
+-Easier to find your mistakes and correct<br>
+-No messy directory full of workbooks<br>
+-Can pull in data from APIs, servers, SPSS files, and many other formats<br>
+-Can do web scraping<br>
+-Make web pages from your analysis<br>
+-Connect RStudio to Github for version control<br>
+-More robust for statistical analyses<br>
+-Summarizing data. More versatile than Pivot Tables.<br>
+-Easier to create new columns (even ones that don't get stored in your table)<br>
+-More versatile for data cleaning<br>
+-You can do mapping!<br>
+-Open source: many users constantly making it better<br>
+
+#The cons of R
+-Higher learning curve<br>
+-No point and click. Lots of typing<br>
+-Charts are harder to make (but so many more options!)<br>
+-More time needed on front-end of analysis<br>
+-Harder to do on deadline until you get proficient<br>
+-There are almost too many packages, many doing the same things!<br>
+-Package and function naming can be confusing. As just one example: To import data we used a readr function called "read_csv". But Base R has an import function called "read.csv". They behave quite differently.<br>
+-The "how to" information that comes with the packages is minimal and oftentimes confusing. However, I've found better guidance on blogs and other websites.<br>
+
+#How to get started
+-Take a starter class, but then do most of your learning on an as-needed basis.<br>
+-For first analysis, use a simple dataset you're already familiar with<br>
+-or find an analysis you've done in the past and recreate it in R<br>
+-<a href="https://www.r-project.org/">Download R</a> and <a href="https://www.rstudio.com/products/rstudio/download/">RStudio</a>.<br>
+-R is made up of Base R, the underlying coding language, but the real power comes from the thousands of packages (or libraries) that enable you to do so many more things. All packages are available on the <a href="https://cran.r-project.org/"> Comprehensive R Archive Network (CRAN)</a>.<br>
+
+#Classes, tutorials, resources
+-NICAR conference<br>
+-<a href="http://learn.r-journalism.com/en/introduction/">Andrew Tran's online class</a><br>
+-<a href="https://www.datacamp.com/courses/dplyr-data-manipulation-r-tutorial">Datacamp</a><br>
+-<a href="https://www.jessesadler.com/post/excel-vs-r/">Excel vs R: A Brief Introduction to R</a><br>
+-<a href="http://www.storybench.org/tag/r/">Storybench</a> is compiling lots of useful tutorials and tips for working in R.<br>
+-<a href="https://smach.github.io/R4JournalismBook/HowDoI.html">How Do I?...</a> A searchable index of tasks and tips collected by data journalist Sharon Machlis. Also check out her book, <a href="https://www.crcpress.com/Practical-R-for-Mass-Communication-and-Journalism/Machlis/p/book/9781138726918">Practice R for Mass Communication and Journalism.</a><br>
+-<a href="https://paldhous.github.io/wcsj/2017/">Peter Aldous' Data Analysis with R training materials</a>. This site really opened the door for me. It focuses on the SQL-like capabilities of the dplyr package and using ggplot2 for visualizations and uses real journalism examples.<br>
+-<a href="https://github.com/dhmontgomery/r-data-for-beginners/blob/master/r_for_beginners.md">Ron Campbell's Intro to R hands-on class from NICAR18.</a> This one is a little more advanced and uses more Base R than the others.<br>
+-<a href="https://www.computerworld.com/article/2497143/business-intelligence/business-intelligence-beginner-s-guide-to-r-introduction.html">Beginner's guide to R, by Sharon Machlis</a>. This covers a lot of basic ground and provides a ton of useful links<br>
+-<a href="https://github.com/Caelainn/R3_NICAR18">This tutorial from NICAR18 by Caelinn Barr</a> covers how to scrape data from a website and some other slightly more advanced concepts.<br>
+-<a href="https://rddj.info/">.Rddj</a>, resources for doing data journalism with R.<br>
+
+
+

@@ -1,0 +1,282 @@
+---
+title: "LeapFromExcelAnalysis"
+author: "MaryJoWebster"
+date: "January 16, 2019"
+output: html_document
+#this is the YAML header and what it looks like by default
+
+
+#let's improve it for our web page
+#title: "Making charts with ggplot2"
+#author: "By MaryJo Webster"
+#date:  "Last updated: `r Sys.Date()`"
+#output:
+#  html_document: 
+#    toc: true
+#    to_depth: 1
+#    toc_float: true
+#    theme: cerulean
+---
+
+```{r setup, include=FALSE}
+#set echo to FALSE so that your code doesn't show up in the HTML page
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#load packages and data
+
+library(readr) #importing csv files 
+library(dplyr) #general analysis 
+library(ggplot2) #making charts 
+library(ggthemes) #this will help make our charts look better
+library(janitor) #for data cleanup
+
+#we'll need these new packages for creating this markdown page to an HTMl page
+library(rmarkdown)
+library(knitr)
+
+
+#Import our data
+deaths <- read_csv('./data/opiate_deaths.csv',col_types=cols(.default="c",BIRTHDATE=col_date("%m/%d/%Y"),DEATHDATE=col_date("%m/%d/%Y"),INJURY_DATE=col_date("%m/%d/%Y"),AGEYEARS="i")) %>%
+  clean_names()
+
+
+#If you use an Rscript for loading, cleaning data, you can connect it to this page so you don't have to repeat loading, etc.
+
+```
+
+# You can put text here as a title
+It will show up as HTMl on the page we create (this will be body type)
+
+```{r}
+#Try displaying the top of the data frame
+deaths
+```
+
+#Select and filter
+```{r}
+ deaths %>% 
+   filter(gender=='F' , race=='BLACK') %>% 
+   select(firstname, lastname, gender, race)
+```
+
+#Count records
+```{r}
+deaths %>% summarise(numrecords=n())
+```
+
+#Pivot Table
+How many people of each gender died?
+```{r}
+deaths %>%
+  group_by(gender) %>% 
+  summarise(numdeaths = n())
+```
+
+What was the average age by gender?
+```{r}
+deaths %>% 
+  group_by(gender) %>% 
+  summarise(avgage = mean(ageyears))
+```
+
+#Group by two variables
+This is something Excel Pivot Tables can't do
+```{r}
+deaths %>% 
+  group_by(gender, race) %>% 
+  summarise(numdeaths = n())
+```
+
+#Sort our results
+```{r}
+deaths %>% 
+  group_by(gender, race) %>% 
+  summarise(numdeaths = n()) %>% 
+  arrange(desc(numdeaths))
+```
+
+#filter summarized results
+Let's just look at the women
+```{r}
+deaths %>% 
+  group_by(gender, race) %>% 
+  summarise(numdeaths = n()) %>% 
+  arrange(desc(numdeaths)) %>% 
+  filter(gender=='F')
+```
+
+
+#add a new calculated column
+Percentage of people who died by gender
+```{r}
+
+deaths %>% 
+  group_by(gender) %>% 
+  summarise(numdeaths = n()) %>% 
+  mutate(pct = numdeaths/sum(numdeaths)) %>% 
+  arrange(desc(pct))
+
+```
+
+#Put it all together
+Round numbers using a tool from janitor package called round_half_up
+```{r}
+deaths %>% 
+  group_by(gender) %>% 
+  summarise(numdeaths = n(), avgage = round(mean(ageyears),1)) %>% 
+  mutate(pct = round_half_up(numdeaths/sum(numdeaths)*100)) %>% 
+  arrange(desc(pct))
+```
+#data cleanup
+How many people died each year?
+We need a field with the year of death
+```{r}
+#We are going to create a new data frame (overwriting the old one)
+#then we are going to tell it to use all the data from the old data frame
+#plus tack on a new variable called "deathyr" 
+#we'll use the mutate function from dplyr to do this
+#plus we're going to use a date function from the lubridate package
+
+library(lubridate)
+
+deaths <-  deaths %>% mutate(deathyr=year(deathdate))
+
+#now let's see what this gave us
+
+deaths %>% 
+  group_by(deathyr) %>% 
+  summarise(numdeaths = n())
+
+```
+
+
+#More recoding
+
+```{r}
+# let's look at this field to see where we've got a problem
+deaths %>% group_by(hispanicethnicity) %>% summarise(count=n())
+```
+
+#Recode values into a new column
+```{r}
+#we'll use a lot of the same things we did above
+#plus a base R function called "case_when" (it's like an IF statement)
+
+deaths <-  deaths %>%
+  mutate(hispanic_new = 
+           case_when(hispanicethnicity=='Non-Hispanic' | 
+hispanicethnicity=='NOT HISPANIC' ~'NOT HISPANIC',
+TRUE~toupper(hispanicethnicity)))
+
+# the base R function called "toupper()" converts values to uppercase
+
+
+#let's see our new column
+
+deaths %>% 
+  group_by(hispanic_new) %>% 
+  summarise(numdeaths = n())
+
+```
+
+#Create a chart
+How many people died each year?
+
+```{r}
+#because we need to summarise our data first, you need to create
+# a new data frame to base the chart on
+
+deaths_by_yr <-  deaths %>% 
+  group_by(deathyr) %>% 
+  summarise(numdeaths = n())
+
+
+#Now we'll use ggplot() to build a bar chart
+deaths_by_year_chart <- 
+  ggplot(deaths_by_yr, aes(x = deathyr, y = numdeaths)) + 
+  geom_bar(stat = "identity")
+
+#this is necessary to actually plot it in the space below
+plot(deaths_by_year_chart)
+
+
+```
+
+#Make the chart look better
+
+```{r}
+#Build the chart again, this time with labels and titles
+deaths_by_year_chart <- 
+  ggplot(deaths_by_yr, aes(x = deathyr, y = numdeaths)) + 
+  geom_bar(stat = "identity") +
+    labs(title = "Number of opiate deaths by year in MN", 
+       subtitle = "2006-2015",
+       caption = "Graphic by MaryJo Webster",
+       x="Year",
+       y="Number of deaths")
+
+plot(deaths_by_year_chart)
+```
+
+#Add color and a theme
+```{r}
+deaths_by_year_chart <- ggplot(deaths_by_yr, aes(x = deathyr, y = numdeaths)) + 
+  geom_bar(stat = "identity", color="black", fill="#59A897") +
+  theme_hc()+
+  labs(title = "Number of opiate deaths by year in MN", 
+       subtitle = "2006-2015",
+       caption = "Graphic by MaryJo Webster",
+       x="Year",
+       y="Number of deaths")
+
+plot(deaths_by_year_chart)
+```
+
+#Fix the x axis values
+```{r}
+deaths_by_year_chart <- ggplot(deaths_by_yr, aes(x = deathyr, y = numdeaths)) + 
+  geom_bar(stat = "identity", color="black", fill="#59A897") +
+  scale_x_continuous(name="Year", breaks=seq(2006, 2015, 1))+
+  theme_fivethirtyeight()+
+  labs(title = "Opiate deaths in Minnesota", 
+       subtitle = "2006-2015",
+       caption = "Graphic by MaryJo Webster",
+       x="Year",
+       y="Number of deaths")
+
+plot(deaths_by_year_chart)
+
+
+```
+
+#Export our chart
+```{r}
+#https://ggplot2.tidyverse.org/reference/ggsave.html
+
+ggsave("deaths_by_year_chart.jpg", width=8, height=5, units="in", dpi="print")
+```
+
+
+#Export data
+```{r}
+deaths_export <-  deaths
+
+#this will send a csv to your working directory
+write.csv(deaths_export, 'deaths_export.csv', row.names=FALSE)
+
+
+#can also export JSON
+
+```
+
+
+
+#Empty environment and run again
+
+#Knit the page
+
+#change echo to false and knit again
+
+#show page built with kable()
