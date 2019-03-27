@@ -57,7 +57,9 @@ deaths
 
 #Select and filter
 ```{r}
- deaths %>% 
+#this is showing all the black females 
+
+deaths %>% 
    filter(gender=='F' , race=='African American') %>% 
    select(firstname, lastname, gender, race)
 ```
@@ -101,7 +103,7 @@ deaths %>%
 #filter summarized results
 Let's just look at the women
 ```{r}
-deaths %>% 
+deaths_bygender_race <- deaths %>% 
   group_by(gender, race) %>% 
   summarise(numdeaths = n()) %>% 
   arrange(desc(numdeaths)) %>% 

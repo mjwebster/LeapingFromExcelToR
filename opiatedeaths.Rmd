@@ -1,0 +1,467 @@
+---
+title: "LeapFromExcelAnalysis"
+author: "MaryJoWebster"
+date: "January 16, 2019"
+output: html_document
+#this is the YAML header and what it looks like by default
+
+
+#let's improve it for our web page
+#title: "Making charts with ggplot2"
+#author: "By MaryJo Webster"
+#date:  "Last updated: `r Sys.Date()`"
+#output:
+#  html_document: 
+#    toc: true
+#    to_depth: 1
+#    toc_float: true
+#    theme: cerulean
+---
+
+```{r setup, include=FALSE}
+#set echo to FALSE so that your code doesn't show up in the HTML page
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#load packages and data
+library(tidyverse)
+library(ggthemes) #this will help make our charts look better
+library(janitor) #for data cleanup
+
+#we'll need these new packages for creating this markdown page to an HTMl page
+library(rmarkdown)
+library(knitr)
+
+
+#Import our data
+deaths <- read_csv('./data/opiate_deaths.csv',col_types=cols(.default="c",BIRTHDATE=col_date("%m/%d/%Y"),DEATHDATE=col_date("%m/%d/%Y"),INJURY_DATE=col_date("%m/%d/%Y"),AGEYEARS="i")) %>%
+  clean_names()
+
+
+#If you use an Rscript for loading, cleaning data, you can connect it to this page so you don't have to repeat loading, etc.
+
+```
+
+# You can put text here as a title
+It will show up as HTMl on the page we create (this will be body type)
+
+```{r}
+#Try displaying the top of the data frame
+deaths
+
+```
+
+```{r}
+#display the column names
+names(deaths)
+```
+
+
+```{r}
+#write your own code to select just 4 columns (any 4 you want)
+
+
+```
+
+
+
+
+#Select and filter
+
+```{r}
+#select only the ones who were less than 18 years old
+
+deaths %>%  select(firstname, ageyears, rescity, deathdate) %>% 
+  filter(ageyears<18)
+
+```
+
+
+
+```{r}
+#show all the black females who died
+
+deaths %>% 
+   filter(gender=='F' , race=='African American') %>% 
+   select(firstname, lastname, gender, race)
+```
+
+
+```{r}
+#Find people who died on New Year's Eve, 2015
+#Note how dates are stored in R
+
+deaths %>%  filter(deathdate=='2015-12-31') 
+```
+
+
+#On your own 
+Insert an R code chunk and pick something to filter by
+
+
+
+
+
+#Count all records
+```{r}
+deaths %>% summarise(numrecords=n())
+```
+
+#Pivot Table
+How many people of each gender died?
+```{r}
+deaths %>%
+  group_by(gender) %>% 
+  summarise(numdeaths = n())
+```
+
+What was the average age by gender?
+```{r}
+deaths %>% 
+  group_by(gender) %>% 
+  summarise(avgage = mean(ageyears))
+```
+
+#Group by two variables
+This is something Excel Pivot Tables can't do
+```{r}
+deaths %>% 
+  group_by(gender, race) %>% 
+  summarise(numdeaths = n()) 
+```
+
+#Sort our results
+```{r}
+deaths %>% 
+  group_by(gender, race) %>% 
+  summarise(numdeaths = n()) %>% 
+  arrange(desc(numdeaths))
+```
+
+## Your turn - summarize
+```{r}
+#Number of deaths by race, ordered from highest to lowest
+
+
+```
+
+
+
+```{r}
+# Number of deaths by county (DEATHCOUNTY), highest to lowest
+
+
+```
+
+
+#filter summarized results
+Let's just look at the women
+```{r}
+#this is going to make a new tibble (data.frame)
+deaths_bygender_race <- deaths %>% 
+  group_by(gender, race) %>% 
+  summarise(numdeaths = n()) %>% 
+  arrange(desc(numdeaths)) %>% 
+  filter(gender=='F')
+```
+
+#Hispanic Ethnicity crosstabbed by race
+arranged descending order
+```{r}
+
+```
+
+repeat that last query, but this time limit it to Hispanic
+```{r}
+
+```
+
+
+#add a new calculated column
+Percentage of people who died by gender
+```{r}
+
+deaths %>% 
+  group_by(gender) %>% 
+  summarise(numdeaths = n()) %>% 
+  mutate(pct = numdeaths/sum(numdeaths)) %>% 
+  arrange(desc(pct))
+
+```
+
+#Put it all together
+Round numbers using a tool from janitor package called round_half_up
+```{r}
+deaths %>% 
+  group_by(gender) %>% 
+  summarise(numdeaths = n(), avgage = round(mean(ageyears),1)) %>% 
+  mutate(pct = round_half_up(numdeaths/sum(numdeaths)*100)) %>% 
+  arrange(desc(pct))
+```
+
+
+#data cleanup
+How many people died each year?
+We need a field with the year of death
+```{r}
+#We are going to create a new tibble (overwriting the old one)
+#then we are going to tell it to use all the data from the old tibble
+#plus tack on a new variable called "deathyr" 
+#we'll use the mutate function from dplyr to do this
+#plus we're going to use a date function from the lubridate package
+
+library(lubridate)
+
+deaths <-  deaths %>% mutate(deathyr=year(deathdate))
+
+
+
+```
+
+
+```{r}
+#now let's see what this gave us
+
+deaths %>% 
+  group_by(deathyr) %>% 
+  summarise(numdeaths = n())
+```
+
+
+
+
+#Create a chart
+How many people died each year?
+
+
+```{r}
+#the most simple code needed for a chart
+ggplot(deaths, aes(x=deathyr)) + 
+  geom_bar()
+
+#this is simply relying on stat_count in ggplot to count the records
+```
+
+#We can even filter it
+```{r}
+#notice the syntax is a little different but it does same thing
+#The aesthetic mapping, usually constructed with aes or aes_string. Only needs to be set at the layer level if you are overriding the plot defaults.
+
+ggplot(deaths %>% filter(gender=='F')) + 
+  geom_bar(mapping = aes(x = deathyr))
+```
+
+
+#Alternative approach
+```{r}
+#If you want to plot something that needs to be calculated first
+#you may need to create a tibble and then plot that
+
+deaths_by_gender <-  deaths %>% 
+  group_by(gender) %>% 
+  summarise(numdeaths = n()) %>% 
+  mutate(pct=numdeaths/sum(numdeaths))
+  
+
+
+#If you want the heights of the bars to represent values in the data, use stat="identity" and map a value to the y aesthetic.
+
+  ggplot(deaths_by_gender, aes(x = gender, y = pct)) + 
+  geom_bar(stat = "identity")
+
+
+```
+
+
+
+
+
+#Make the chart look better
+
+```{r}
+#Build the chart again, this time with labels and titles
+ggplot(deaths, aes(x=deathyr)) + 
+  geom_bar()+
+    labs(title = "Number of opiate deaths by year in MN", 
+       subtitle = "2005-2017",
+       caption = "Graphic by MaryJo Webster",
+       x="Year",
+       y="Number of deaths")
+
+#more info on labs() https://ggplot2.tidyverse.org/reference/labs.html
+
+```
+
+#Add color and a theme
+```{r}
+ggplot(deaths, aes(x=deathyr)) + 
+  geom_bar(color="black", fill="#59A897")+
+  theme_hc()+
+  labs(title = "Number of opiate deaths by year in MN", 
+       subtitle = "2005-2017",
+       caption = "Graphic by MaryJo Webster",
+       x="Year",
+       y="Number of deaths")
+
+#hex color codes: https://www.color-hex.com/
+
+```
+
+#Fix the x axis values
+Also change the theme and color
+```{r}
+ggplot(deaths, aes(x=deathyr)) + 
+  geom_bar(color="black", fill="#3e0045")+
+  scale_x_continuous(name="Year", breaks=seq(2005, 2017, 1))+
+  theme_fivethirtyeight() +
+  labs(title = "Opiate deaths in Minnesota", 
+       subtitle = "2005-2017",
+       caption = "Graphic by MaryJo Webster",
+       x="Year",
+       y="Number of deaths")
+
+
+
+
+```
+
+
+
+#Export our chart
+```{r}
+#https://ggplot2.tidyverse.org/reference/ggsave.html
+
+ggsave("deaths_by_year_chart.jpg", width=8, height=5, units="in", dpi="print")
+```
+
+
+#Export data
+```{r}
+female_deaths_export <-  deaths %>% filter(gender=='F')
+
+#this will send a csv to your working directory
+write.csv(female_deaths_export, 'female_deaths_export.csv', row.names=FALSE)
+
+
+#can also export as Excel or JSON
+
+```
+
+
+
+# More  filtering
+
+
+## Filtering with "or"
+
+```{r}
+# find people who were either Black or American Indian
+
+#option 1 using the pipe character
+deaths%>%
+  filter(race=="African American" | race=="American Indian") %>%
+  select(lastname, deathdate, gender, race)
+
+
+#option 2 using %in%  (this one would be more useful if you have a long series you want to include)
+deaths%>%
+  filter(race %in% c("Japanese", "Chinese", "Korean")) %>%
+  select(lastname, deathdate, gender, race)
+```
+
+
+##Filtering with a wildcard
+<p>Too often, our data is inconsistent and telling it to find one thing will be insufficient. In filters in Excel, we have the option to choose "begins with" or "contains" to find values that might not perfectly match. In this dataset, there are several variations for people described as being white. To get them, we'll need this kind of wildcard.</p>
+<p>To do this, we're going to use dplyr's filter function, along with Base R's grepl, which is a way to do string and pattern matching.</p>
+
+
+```{r query5}
+#the syntax for grepl is to put the word you're looking for in quotes, followed by the name of the column where you want it to look
+  deaths %>%
+  filter(grepl("White", race)) %>%
+  group_by(race) %>%
+  summarize(count=n()) 
+```
+
+##Filtering between two values
+<p>Perhaps we want to find all the people who were between ages 18 and 21. Note that I'm using greater than-equal to and less than-equal to, so that it includes 18 and 21 in my results.</p>
+
+```{r query6}
+deaths %>%
+  filter(ageyears>=18, ageyears<=21) %>%
+  group_by(ageyears) %>%
+  summarise(count=n()) 
+```
+
+
+#Recoding
+
+```{r}
+# let's look at this field to see where we've got a problem
+deaths %>% group_by(hispanicethnicity) %>% summarise(count=n())
+```
+
+#Recode values into a new column
+```{r}
+#we'll use a lot of the same things we did above
+#plus a base R function called "case_when" (it's like an IF statement)
+
+deaths <-  deaths %>%
+  mutate(hispanic_new = 
+           case_when(hispanicethnicity=='Non-Hispanic' | 
+hispanicethnicity=='NOT HISPANIC' ~'NOT HISPANIC',
+TRUE~toupper(hispanicethnicity)))
+
+# the base R function called "toupper()" converts values to uppercase
+
+
+#let's see our new column
+
+deaths %>% 
+  group_by(hispanic_new) %>% 
+  summarise(numdeaths = n())
+
+```
+
+#How many people died from each county?
+```{r}
+
+```
+
+#Are there people in here who didn't live in Minnesota?
+
+
+
+#Deaths by county, excluding non-Minnesotans
+Make a new tibble
+
+
+#Import county population data
+```{r}
+#we'll use the readxl package from Tidyverse
+library(readxl)
+
+pop <-  read_excel("./data/county_pop.xlsx", sheet="Sheet1", range="A1:B88")
+
+
+#view the new data frame
+
+```
+
+#Join county population to new data frame
+
+
+#Make sure everything joined ok
+
+
+#Calculate a per capita rate and make that a new column
+
+
+
+#which county had the highest death rate?
+
+
+#what can we say about our findings?
+
+#Anything we missed?

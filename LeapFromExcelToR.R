@@ -17,8 +17,7 @@
 
 
 #The syntax for installing a package
-#install.package("tidyverse")
-
+#install.packages(c("rmarkdown", "kableExtra", "lubridate", "knitr", "tidyverse", "ggplot2",  "janitor", "scales", "ggthemes", "DT"))
 
 
 
@@ -26,19 +25,21 @@
 
 
 #Need to load packages each time you work in R
+library(tidyverse)
+#packages we will be using from within tidyverse: 
+ #readr --  importing csv files 
+#dplyr --  #general analysis 
+#gpplot2 --  #making charts 
 
-library(readr) #importing csv files 
-library(dplyr) #general analysis 
-library(ggplot2) #making charts 
 
-
+getwd()  #how to check what directory we are working from
 
 
 # IMPORT DATA -------------------------------------------------------------
 
 #Death records for opioid-related deaths
 
-#first we'll set the name of our new data frame
+#first we'll set the name of our new tibble (tidyverse version of a data.frame)
 #then we'll use the read_csv, which is part of the readr package
 #and we'll tell it where to find csv file
 
@@ -46,6 +47,8 @@ deaths <- read_csv('./data/opiate_deaths.csv')
 
 
 # REVIEW DATA -------------------------------------------------------------
+
+head(deaths)
 
 #this shows us the column names
 names(deaths)
@@ -84,6 +87,7 @@ library(janitor)
 
 
 
+
 deaths <- read_csv('./data/opiate_deaths.csv',
                    col_types=cols(.default="c", BIRTHDATE=col_date("%m/%d/%Y"),
                                   DEATHDATE=col_date("%m/%d/%Y"),
@@ -106,16 +110,31 @@ head(deaths)
 #but with more versatility
 
 
-#showing only select columns
+#showing only select columns- let's check those date fields
 
-deaths %>%  select(firstname, lastname, gender, race)
+deaths %>%  select(firstname, lastname, birthdate, deathdate, gender)
+
+#can use names() or head() to check column names
 
 #filtering only select rows
- deaths %>% filter(gender=='F')
+ deaths %>% filter(gender=='F')%>%  select(firstname, lastname, gender, race)
  
+ #How do we know that "F" is the right value?
+ deaths %>% count(gender)
+ 
+ #Let's check out the race field
+ deaths %>% count(race)
+ 
+ #Now select all the records where Chinese or Japanese
+ deaths %>%
+   filter(race=='Chinese' | race=='Japanese') %>%
+   select(firstname, gender, race, deathdate)
 
+ #notice how the code is indented?
+ 
  #As you've probably figured out, seeing results of your analysis
  #in a script page doesn't work out too well
  #let's move over to an RMarkdown page where we can make it look better
  
+
  
