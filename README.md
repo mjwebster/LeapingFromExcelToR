@@ -21,3 +21,7 @@ https://www.computerworld.com/article/3038270/create-maps-in-r-in-10-fairly-easy
 
 The R graph gallery:
 https://www.r-graph-gallery.com/
+
+
+Styling your Markdown pages with KableExtra:
+https://haozhu233.github.io/kableExtra/awesome_table_in_html.html
